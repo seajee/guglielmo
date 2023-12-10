@@ -1,10 +1,20 @@
 CXX=g++
 CXXFLAGS=-Wall -Wextra -I./include -I./vendor
-LIBS=`pkg-config --libs glfw3 glew glm`
-SRC=*.cpp vendor/stb_image/stb_image.cpp
+LDFLAGS=`pkg-config --libs glfw3 glew glm`
+BUILDDIR=./build
 
-all:
-	$(CXX) -o app $(CXXFLAGS) $(LIBS) $(SRC)
+SRC=$(wildcard *.cpp vendor/stb/*.cpp vendor/imgui/*.cpp)
+OBJ=$(patsubst %.cpp,build/%.o,$(SRC))
 
-debug:
-	$(CXX) -o app-debug $(CXXFLAGS) $(LIBS) $(SRC) -DDEBUG
+all: $(OBJ)
+	@$(CXX) $(CXXFLAGS) $(OBJ) -o opengl $(LDFLAGS)
+	@echo "opengl"
+
+build/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	@$(CXX) -o $@ $< -c $(CXXFLAGS)
+	@echo $@
+
+clean:
+	@rm -rf opengl build/
+	@echo "clean"
