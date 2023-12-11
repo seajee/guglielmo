@@ -8,9 +8,9 @@ SRC=$(wildcard *.cpp vendor/stb/*.cpp vendor/imgui/*.cpp)
 OBJ=$(patsubst %.cpp,build/%.o,$(SRC))
 
 ifeq ($(DEBUG), 0)
-	CXXFLAGS+=-DDEBUG
-else
 	CXXFLAGS+=-O3
+else
+	CXXFLAGS+=-DDEBUG
 endif
 
 all: $(OBJ)

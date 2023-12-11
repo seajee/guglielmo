@@ -4,6 +4,10 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
@@ -25,6 +29,10 @@ Application::Application(
 
 Application::~Application()
 {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     glfwTerminate();
 }
 
@@ -69,6 +77,7 @@ bool Application::Init()
 
 void Application::Run()
 {
+    // Buffers
     float positions[16] = {
         // positions    // textureCoords
         100.0f, 100.0f, 0.0f, 0.0f,
@@ -82,6 +91,7 @@ void Application::Run()
         2, 3, 0
     };
 
+    // Essentials
     VertexArray va;
     VertexBuffer vb(positions, 4 * 4 * sizeof(float));
     VertexBufferLayout layout;
@@ -93,31 +103,81 @@ void Application::Run()
 
     IndexBuffer ib(indices, 6);
 
+    // Model view projection matrices
     glm::mat4 proj = glm::ortho(0.0f, (float)m_WindowWidth, 0.0f, (float)m_WindowHeight, -1.0f, 1.0f);
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0.0f, 0.0f));
     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200.0f, 200.0f, 0.0f));
 
     glm::mat4 mvp = proj * view * model;
 
+    // Shader
     Shader shader("./shaders/vertex.vert", "./shaders/fragment.frag");
     shader.Bind();
     shader.SetUniformMat4f("u_MVP", mvp);
 
+    // Renderer
     Renderer renderer;
 
+    // ImGui
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.IniFilename = NULL;
+    io.LogFilename = NULL;
+
+    ImGui::StyleColorsDark();
+
+    // Texture
     Texture texture("./assets/pepe.png");
     texture.Bind();
     shader.SetUniform1i("u_Texture", 0);
 
+    // Unbind everything
     va.Unbind();
     vb.Unbind();
     ib.Unbind();
     shader.Unbind();
 
+    // Main loop
     while (!glfwWindowShouldClose(m_Window))
     {
         renderer.Clear();
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        {
+            static float f = 0.0f;
+            static int counter = 0;
+            static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+            //ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+            //ImGui::Checkbox("Another Window", &show_another_window);
+
+            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                counter++;
+            ImGui::SameLine();
+            ImGui::Text("counter = %d", counter);
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            ImGui::End();
+        }
+
         renderer.Draw(va, ib, shader);
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(m_Window);
         glfwPollEvents();
