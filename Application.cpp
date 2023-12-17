@@ -104,10 +104,13 @@ void Application::Run()
     IndexBuffer ib(indices, 6);
 
     // Model view projection matrices (transform, camera, projection)
-    //glm::mat4 proj = glm::ortho(0.0f, (float)m_WindowWidth, 0.0f, (float)m_WindowHeight, -1.0f, 1.0f);
-    glm::mat4 proj = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-    //glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0.0f, 0.0f));
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 proj = glm::mat4(1.0f);
+
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
+    //proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+    proj = glm::perspective(glm::radians(45.0f), (float)m_WindowWidth / m_WindowHeight, 0.1f, 100.0f);
 
     // Shader
     Shader shader("./shaders/vertex.vert", "./shaders/fragment.frag");
@@ -153,12 +156,12 @@ void Application::Run()
         ImGui::NewFrame();
 
         {
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+            model = glm::translate(glm::mat4(1.0f), translation);
             model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
             glm::mat4 mvp = proj * view * model;
 
-            ImGui::SliderFloat3("translation", &translation.x, 0.0f, 1.0f);
+            ImGui::SliderFloat3("translation", &translation.x, -10.0f, 10.0f);
             ImGui::SliderFloat("rotation", &rotation, 0.0f, 360.0f);
             shader.Bind();
             shader.SetUniformMat4f("u_MVP", mvp);
