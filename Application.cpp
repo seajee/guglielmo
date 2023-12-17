@@ -78,34 +78,36 @@ bool Application::Init()
 void Application::Run()
 {
     // Buffers
-    float positions[16] = {
-        // positions    // textureCoords
-        100.0f, 100.0f, 0.0f, 0.0f,
-        200.0f, 100.0f, 1.0f, 0.0f,
-        200.0f, 200.0f, 1.0f, 1.0f,
-        100.0f, 200.0f, 0.0f, 1.0f
+    float positions[] = {
+        // Positions           TexCoords
+        -0.5f, -0.5f, 0.0f,    0.0f, 0.0f, // lower left
+        -0.5f,  0.5f, 0.0f,    0.0f, 1.0f, // upper left
+         0.5f,  0.5f, 0.0f,    1.0f, 1.0f, // upper right
+         0.5f, -0.5f, 0.0f,    1.0f, 0.0f  // lower right
     };
 
     unsigned int indices[6] = {
-        0, 1, 2,
-        2, 3, 0
+        0, 2, 1,
+        0, 3, 2
     };
 
     // Essentials
     VertexArray va;
-    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
+    VertexBuffer vb(positions, 5 * 4 * sizeof(float));
     VertexBufferLayout layout;
 
-    layout.Push(GL_FLOAT, 2);
+    layout.Push(GL_FLOAT, 3);
     layout.Push(GL_FLOAT, 2);
 
     va.AddBuffer(vb, layout);
 
     IndexBuffer ib(indices, 6);
 
-    // Model view projection matrices
-    glm::mat4 proj = glm::ortho(0.0f, (float)m_WindowWidth, 0.0f, (float)m_WindowHeight, -1.0f, 1.0f);
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0.0f, 0.0f));
+    // Model view projection matrices (transform, camera, projection)
+    //glm::mat4 proj = glm::ortho(0.0f, (float)m_WindowWidth, 0.0f, (float)m_WindowHeight, -1.0f, 1.0f);
+    glm::mat4 proj = glm::ortho(0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+    //glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0.0f, 0.0f));
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     // Shader
     Shader shader("./shaders/vertex.vert", "./shaders/fragment.frag");
@@ -138,7 +140,8 @@ void Application::Run()
     ib.Unbind();
     shader.Unbind();
 
-    glm::vec3 translation(200.0f, 200.0f, 0.0f);
+    glm::vec3 translation(0.0f, 0.0f, 0.0f);
+    float rotation = 0.0f;
 
     // Main loop
     while (!glfwWindowShouldClose(m_Window))
@@ -151,9 +154,12 @@ void Application::Run()
 
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+            model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+
             glm::mat4 mvp = proj * view * model;
 
-            ImGui::SliderFloat3("translation", &translation.x, 0.0f, m_WindowWidth);
+            ImGui::SliderFloat3("translation", &translation.x, 0.0f, 1.0f);
+            ImGui::SliderFloat("rotation", &rotation, 0.0f, 360.0f);
             shader.Bind();
             shader.SetUniformMat4f("u_MVP", mvp);
 
