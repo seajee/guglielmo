@@ -3,6 +3,7 @@
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <GLFW/glfw3.h>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -15,6 +16,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Renderer.h"
+#include "Camera.h"
 
 Application::Application(
         int windowWidth,
@@ -72,7 +74,8 @@ bool Application::Init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glDisable(GL_BLEND);
+    // TODO: This is temporary
+    glEnable(GL_DEPTH_TEST);
 
     return true;
 }
@@ -100,7 +103,7 @@ void Application::Run()
 
     // Essentials
     VertexArray va;
-    VertexBuffer vb(vertices, 5 * 5 * sizeof(float));
+    VertexBuffer vb(vertices, sizeof(vertices));
     VertexBufferLayout layout;
 
     layout.Push(GL_FLOAT, 3);
@@ -108,16 +111,14 @@ void Application::Run()
 
     va.AddBuffer(vb, layout);
 
-    IndexBuffer ib(indices, 3 * 6);
+    IndexBuffer ib(indices, sizeof(indices) / sizeof(unsigned int));
 
     // Model view projection matrices (transform, camera, projection)
     glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 proj = glm::mat4(1.0f);
 
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
-    //proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-    proj = glm::perspective(glm::radians(45.0f), (float)m_WindowWidth / m_WindowHeight, 0.1f, 100.0f);
+    // Camera
+    Camera camera(m_WindowWidth, m_WindowHeight, glm::vec3(0.0f, 0.0f, 2.0f),
+            45.0f, 0.1f, 100.0f);
 
     // Shader
     Shader shader("./shaders/vertex.vert", "./shaders/fragment.frag");
@@ -125,6 +126,17 @@ void Application::Run()
 
     // Renderer
     Renderer renderer;
+
+    // Texture
+    Texture texture("./assets/pepe.png");
+    texture.Bind();
+    shader.SetUniform1i("u_Texture", 0);
+
+    // Unbind everything
+    va.Unbind();
+    vb.Unbind();
+    ib.Unbind();
+    shader.Unbind();
 
     // ImGui
     ImGui::CreateContext();
@@ -139,16 +151,6 @@ void Application::Run()
 
     ImGui::StyleColorsDark();
 
-    // Texture
-    Texture texture("./assets/pepe.png");
-    texture.Bind();
-    shader.SetUniform1i("u_Texture", 0);
-
-    // Unbind everything
-    va.Unbind();
-    vb.Unbind();
-    ib.Unbind();
-    shader.Unbind();
 
     glm::vec3 translation(0.0f, 0.0f, 0.0f);
     float rotation = 0.0f;
@@ -158,6 +160,8 @@ void Application::Run()
     {
         renderer.Clear();
 
+        camera.Inputs(m_Window);
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -166,9 +170,9 @@ void Application::Run()
             model = glm::translate(glm::mat4(1.0f), translation);
             model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
-            glm::mat4 mvp = proj * view * model;
+            glm::mat4 mvp = camera.Matrix() * model;
 
-            ImGui::SliderFloat3("translation", &translation.x, -10.0f, 10.0f);
+            ImGui::SliderFloat3("translation", &translation.x, -3.0f, 3.0f);
             ImGui::SliderFloat("rotation", &rotation, 0.0f, 360.0f);
             shader.Bind();
             shader.SetUniformMat4f("u_MVP", mvp);
