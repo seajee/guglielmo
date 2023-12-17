@@ -72,28 +72,35 @@ bool Application::Init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glDisable(GL_BLEND);
+
     return true;
 }
 
 void Application::Run()
 {
     // Buffers
-    float positions[] = {
+    float vertices[] = {
         // Positions           TexCoords
-        -0.5f, -0.5f, 0.0f,    0.0f, 0.0f, // lower left
-        -0.5f,  0.5f, 0.0f,    0.0f, 1.0f, // upper left
-         0.5f,  0.5f, 0.0f,    1.0f, 1.0f, // upper right
-         0.5f, -0.5f, 0.0f,    1.0f, 0.0f  // lower right
+        -0.5f, 0.0f,  0.5f,    0.0f, 0.0f, // near left
+        -0.5f, 0.0f, -0.5f,    1.0f, 0.0f, // far left
+         0.5f, 0.0f, -0.5f,    0.0f, 0.0f, // far right
+         0.5f, 0.0f,  0.5f,    1.0f, 0.0f, // near right
+         0.0f, 0.8f,  0.0f,    0.5f, 1.0f  // top middle
     };
 
-    unsigned int indices[6] = {
-        0, 2, 1,
-        0, 3, 2
+    unsigned int indices[] = {
+        0, 1, 2,
+        0, 2, 3,
+        0, 1, 4,
+        1, 2, 4,
+        2, 3, 4,
+        3, 0, 4
     };
 
     // Essentials
     VertexArray va;
-    VertexBuffer vb(positions, 5 * 4 * sizeof(float));
+    VertexBuffer vb(vertices, 5 * 5 * sizeof(float));
     VertexBufferLayout layout;
 
     layout.Push(GL_FLOAT, 3);
@@ -101,7 +108,7 @@ void Application::Run()
 
     va.AddBuffer(vb, layout);
 
-    IndexBuffer ib(indices, 6);
+    IndexBuffer ib(indices, 3 * 6);
 
     // Model view projection matrices (transform, camera, projection)
     glm::mat4 model = glm::mat4(1.0f);
