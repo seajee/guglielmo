@@ -154,6 +154,8 @@ void Application::Run()
     // Transforms
     glm::vec3 translation(0.0f, 0.0f, 0.0f);
     float rotation = 0.0f;
+    bool animate = true;
+    float step = 1.0f;
 
     // Main loop
     while (!glfwWindowShouldClose(m_Window))
@@ -167,6 +169,10 @@ void Application::Run()
         ImGui::NewFrame();
 
         {
+            if (animate) {
+                rotation += step;
+            }
+
             model = glm::translate(glm::mat4(1.0f), translation);
             model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -174,6 +180,8 @@ void Application::Run()
 
             ImGui::SliderFloat3("translation", &translation.x, -3.0f, 3.0f);
             ImGui::SliderFloat("rotation", &rotation, 0.0f, 360.0f);
+            ImGui::SliderFloat("step", &step, -2.0f, 2.0f);
+            ImGui::Checkbox("animate", &animate);
 
             shader.Bind();
             shader.SetUniformMat4f("u_MVP", mvp);
