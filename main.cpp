@@ -4,7 +4,7 @@
 
 int main(void)
 {
-    Application app(960, 540, "OpenGL");
+    Application app(600, 600, "OpenGL");
 
     if (!app.Init()) {
         std::cerr << "ERROR: Could not initialize Application" << std::endl;

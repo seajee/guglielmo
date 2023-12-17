@@ -27,4 +27,5 @@ private:
     float m_FarPlane;
 
     float m_Speed;
+    float m_Sensitivity;
 };

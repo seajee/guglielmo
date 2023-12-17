@@ -118,7 +118,7 @@ void Application::Run()
 
     // Camera
     Camera camera(m_WindowWidth, m_WindowHeight, glm::vec3(0.0f, 0.0f, 2.0f),
-            45.0f, 0.1f, 100.0f);
+            80.0f, 0.1f, 100.0f);
 
     // Shader
     Shader shader("./shaders/vertex.vert", "./shaders/fragment.frag");
@@ -151,7 +151,7 @@ void Application::Run()
 
     ImGui::StyleColorsDark();
 
-
+    // Transforms
     glm::vec3 translation(0.0f, 0.0f, 0.0f);
     float rotation = 0.0f;
 
@@ -174,6 +174,7 @@ void Application::Run()
 
             ImGui::SliderFloat3("translation", &translation.x, -3.0f, 3.0f);
             ImGui::SliderFloat("rotation", &rotation, 0.0f, 360.0f);
+
             shader.Bind();
             shader.SetUniformMat4f("u_MVP", mvp);
 
