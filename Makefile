@@ -14,8 +14,8 @@ else
 endif
 
 all: $(OBJ)
-	@$(CXX) $(CXXFLAGS) $(OBJ) -o opengl $(LDFLAGS)
-	@echo "opengl"
+	@$(CXX) $(CXXFLAGS) $(OBJ) -o guglielmo $(LDFLAGS)
+	@echo "guglielmo"
 
 build/%.o: %.cpp
 	@mkdir -p $(dir $@)
