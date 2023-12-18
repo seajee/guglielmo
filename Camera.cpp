@@ -34,6 +34,8 @@ glm::mat4 Camera::Matrix() const
 
 void Camera::Inputs(GLFWwindow* window)
 {
+    static bool firstClick = true;
+
     //  W
     // ASD
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -69,6 +71,11 @@ void Camera::Inputs(GLFWwindow* window)
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+        if (firstClick) {
+            glfwSetCursorPos(window, m_Width / 2, m_Height / 2);
+            firstClick = false;
+        }
+
         double mx;
         double my;
         glfwGetCursorPos(window, &mx, &my);
@@ -92,6 +99,7 @@ void Camera::Inputs(GLFWwindow* window)
         glfwSetCursorPos(window, m_Width / 2, m_Height / 2);
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE) {
+        firstClick = true;
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 }
