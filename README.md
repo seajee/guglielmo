@@ -1,6 +1,8 @@
 # Guglielmo
 
-This project is ment to be a place to tickle around with OpenGL.
+![Guglielmo](screenshots/thumb.jpg)
+
+This project is ment to be a place for messing around with OpenGL.
 
 ## Quick start
 
@@ -10,5 +12,5 @@ To build the project you can run the following
 make
 ```
 
-## Requirements
+## Dependencies
 Prerequisites: glfw3, glew, glm
