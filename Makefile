@@ -23,5 +23,5 @@ build/%.o: %.cpp
 	@echo $@
 
 clean:
-	@rm -rf opengl build/
+	@rm -rf guglielmo build/
 	@echo "clean"
